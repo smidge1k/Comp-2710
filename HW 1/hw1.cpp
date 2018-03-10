@@ -36,5 +36,5 @@ int main()
    cout << "\nYou can drink " << sodapop << " diet soda without dying as a result." << endl;
    
    system("pause");
-   return 0;
+   return 0; 
 }
