@@ -34,7 +34,7 @@ int main()
    sodapop = (humansweet / MY_FRAC);
 
    cout << "\nYou can drink " << sodapop << " diet soda without dying as a result." << endl;
-
+   
    system("pause");
    return 0;
 }
