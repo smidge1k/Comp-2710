@@ -151,7 +151,7 @@ void test_initializeList()
     initializeList(tL);
 
 
-	assert(tL.count == 3); //set number of triviain the list
+	assert(tL.count == 3); //set number of trivia in the list
 	
 	assert(tL.head -> points == 100);
     assert(tL.root -> points == 20);
@@ -171,6 +171,63 @@ void test_initializeList()
     //tL.root = q3;
 }
 
+void test_askQuestion()
+{
+	// Initialize test fixtures
+	triviaList tL;
+	int passOrFail;
+	int noQuestions = 0, oneQuestion = 1, allQuestions = 3, moreQuestions = 5;
+	
+	// Setup Trivia list
+	initializeList(tL);
+
+	cout << "\nFunction to test: int askQuestion(triviaList& tL, int i)\n";
+
+	// Case 1
+	cout << "\tUnit Test Case 1: Ask no questions. The program should give a warning message.\n";
+	passOrFail = askQuestion(tL, noQuestions);
+	
+	// Run assertions
+	assert(passOrFail == 1);
+	cout << "\tCase 1 passed...\n";
+	
+	// Case 2.1
+	cout << "\n\tUnit Test Case 2.1: Ask 1 question in the linked list. The tester enters an incorrect answer.\n";
+	passOrFail = askQuestion(tL, oneQuestion);
+
+	// Run assertions
+	assert(passOrFail == 0);
+	assert(tL.head -> points == 0);
+	cout << "\tCase 2.1 passed...\n";
+
+	// Case 2.2
+	cout << "\n\tUnit Test Case 2.2: Ask 1 question in the linked list. The tester enters a correct answer.\n";
+	passOrFail = askQuestion(tL, oneQuestion);
+	
+	// Run assertions
+	assert(passOrFail == 0);
+	assert(tL.head -> points == 100);
+	cout << "\tCase 2.2 passed...\n";
+
+	// Case 3
+	cout << "\n\tUnit Test Case 3: Ask all of the questions in the linked list. Answers given do not matter.\n";
+	passOrFail = askQuestion(tL, allQuestions);
+
+	// Run assertions
+	assert(passOrFail == 0);
+	// cover all possible scores
+	assert(tL.head -> points >= 0 || tL.root -> points <= 170);
+	cout << "\tCase 3 passed...\n";
+
+	// Case 4
+	cout << "\n\tUnit Test Case 4: Attempt to ask 5 questions in the linked list. Program should give a warning message.\n";
+	passOrFail = askQuestion(tL, moreQuestions);
+
+	// Run assertions
+	assert(passOrFail == 1);
+	cout << "\tCase 4 passed...\n";
+}
+
 #ifdef UNIT_TESTING
    void test_initializeList(void);
 	//void test_addTrivia(void);
@@ -182,9 +239,7 @@ void test_initializeList()
    //insert unit testing code
      #ifdef UNIT_TESTING
 	cout << "*** This is a debugging version ***\n";
-	test_initializeList();
-	//test_addNewQuestion();
-	//test_askUserQuestion();
+	test_askQuestion();
 	cout << "\n*** End of the debugging version ***\n";
 
  //insert production code   
