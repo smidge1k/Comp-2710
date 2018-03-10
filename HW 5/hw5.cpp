@@ -163,7 +163,7 @@ void test_initializeList() {
     cout << "\n..." << endl;    
 
     cout << "\n*** Thank you for playing the trivia quiz game. Goodbye! ***" << endl;
-    
+   
     #endif
     return 0;
  }
