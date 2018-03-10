@@ -70,6 +70,6 @@ int main()
    cout << "\nIt takes " << month << " months to pay off the loan.\n";
    cout << "Total interest paid is: $" << total << endl;
    cout <<
-      
+     
       return 0;
 }
