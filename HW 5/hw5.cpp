@@ -144,7 +144,7 @@ void test_initializeList()
     //triviaNode *q3 = new triviaNode;
 
 
-	cout << "\nFunction to test: void hardCodedTriviaList(triviaList& tL)\n";
+	cout << "\nFunction to test: void initializeList(triviaList& tL)\n";
 	cout << "\tUnit Test Case 1: Check if initialization of 3 trivia questions works properly\n";
 	initializeList(tL);
 
