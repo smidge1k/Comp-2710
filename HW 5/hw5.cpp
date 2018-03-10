@@ -73,6 +73,7 @@ void initializeList(triviaList &tL) {
 int askQuestion(triviaList tL, int i) {
     triviaNode *q = tL.head;
 
+
  //parameter checking 
 
     if (i == 0) { // checks if the number of trivia questions is equal to zero
@@ -189,7 +190,9 @@ void test_askQuestion()
 	
 	// Run assertions
 	assert(passOrFail == 0);
-	cout << "\n\tCase 1 passed...\n";
+	//Should give a 1 since the program didnt really work...
+
+    cout << "\n\tCase 1 passed...\n";
 	
 	// Case 2.1
 	cout << "\n\tUnit Test Case 2.1: Ask 1 question in the linked list. The tester enters an incorrect answer.\n";
@@ -197,7 +200,17 @@ void test_askQuestion()
 
 	// Run assertions
 	assert(passOrFail == 0);
+    
+
 	assert(tL.head -> points != 0);
+    /**
+     * Doesnt actually test what you want
+     * This just lets you know that the first question has 
+     * a non-zero amount of points.
+     * You want to check that you got the points for getting the question 
+     * correct or didnt get any points for getting them wrong.
+     */
+
 	cout << "\tCase 2.1 passed...\n";
 
 	// Case 2.2
@@ -216,6 +229,7 @@ void test_askQuestion()
 	// Run assertions
 	assert(passOrFail == 0);
 	// cover all possible scores
+    //again does not test what you really want it to do.
 	assert(tL.head -> points >= 0 || tL.root -> points <= 170);
 	cout << "\tCase 3 passed...\n";
 
@@ -225,6 +239,7 @@ void test_askQuestion()
 
 	// Run assertions
 	assert(passOrFail == 5);
+    //Should return 0 as the program did run correctly.
 	cout << "\tCase 4 passed...\n";
 }
 
