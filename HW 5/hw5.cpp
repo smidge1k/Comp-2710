@@ -188,8 +188,8 @@ void test_askQuestion()
 	passOrFail = askQuestion(tL, noQuestions);
 	
 	// Run assertions
-	assert(passOrFail == 1);
-	cout << "\tCase 1 passed...\n";
+	assert(passOrFail == 0);
+	cout << "\n\tCase 1 passed...\n";
 	
 	// Case 2.1
 	cout << "\n\tUnit Test Case 2.1: Ask 1 question in the linked list. The tester enters an incorrect answer.\n";
@@ -197,7 +197,7 @@ void test_askQuestion()
 
 	// Run assertions
 	assert(passOrFail == 0);
-	assert(tL.head -> points == 0);
+	assert(tL.head -> points != 0);
 	cout << "\tCase 2.1 passed...\n";
 
 	// Case 2.2
@@ -224,7 +224,7 @@ void test_askQuestion()
 	passOrFail = askQuestion(tL, moreQuestions);
 
 	// Run assertions
-	assert(passOrFail == 1);
+	assert(passOrFail == 5);
 	cout << "\tCase 4 passed...\n";
 }
 
