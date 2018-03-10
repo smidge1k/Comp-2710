@@ -139,26 +139,27 @@ void test_initializeList()
 	triviaList tL;
 
 
-    triviaNode *q1 = new triviaNode;
+    //triviaNode *q1 = new triviaNode;
     //triviaNode *q2 = new triviaNode;
     //triviaNode *q3 = new triviaNode;
 
 
 	cout << "\nFunction to test: void initializeList(triviaList& tL)\n";
 	cout << "\tUnit Test Case 1: Check if initialization of 3 trivia questions works properly\n";
-	initializeList(tL);
+	
+    //initializes test fixtures
+    initializeList(tL);
 
-    tL.head = new triviaNode;
-	assert(tL.count == 3);
-	// assertions for first question
-	assert(tL.head -> question == "How long was the shortest war on record? (Hint: how many minutes?)");
-	//assert( -> answer == "38");
-	//assert(q1 -> points == 100);
-	// assertions for second question
+
+	assert(tL.count == 3); //set number of triviain the list
+	
+	assert(tL.head -> points == 100);
+    assert(tL.root -> points == 20);
+	
 	//assert(q1 -> next -> question == "What was Bank of America's original name? (Hint: Bank of Italy or Bank of Germany?)");
 	//assert(q1 -> next -> answer == "Bank of Italy");
 	//assert(q1 -> next -> points == 50);
-	// assertions for third question
+	
 	//assert(q1 -> next -> next -> question == "What is the best-selling video game of all time? (Hint: Minecraft or Tetris)");
 	//assert(q1 -> next -> next -> answer == "Tetris");
 	//assert(q1 -> next -> next -> points == 20);
@@ -166,9 +167,8 @@ void test_initializeList()
 
 	cout << "\tCase 1 passed...\n";
 
-     tL.head = q1;
+    //tL.head = q1;
     //tL.root = q3;
-  
 }
 
 #ifdef UNIT_TESTING
