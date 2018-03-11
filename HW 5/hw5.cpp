@@ -1,9 +1,3 @@
-# include <iostream>
-# include <cstring>
-# include <assert.h>
-# include <cstdlib>
-using namespace std;
-
 /**
  * Darrian Johnson 
  * COMP 2710 
@@ -104,35 +98,6 @@ int askQuestion(triviaList tL, int i) {
     }
     return 0; 
 }
-
-
-// this function prompts the user to create their own question, answer, and point value
-void addTrivia(triviaList &tL){
-    string response;
- do {
-    tL.count++; //increases the count of questions
-    triviaNode *temp = new triviaNode;
-    //prompts the user to enter a question
-    cout << "Enter a question: ";
-    getline(cin, temp -> question);
-    //prompts the user to create an answer to their question
-    cout << "Enter an answer: ";
-    getline(cin, temp -> answer);
-    //the user creates a point value to be awarded to the player
-    cout << "Enter award points: ";
-    cin >> temp -> points;
-   //prompts the user to continue
-    cout << "Continue? (Yes/No): ";
-    getline(cin.ignore(), response);
-    
-    //adds new trivia to list
-        tL.root -> next = temp;
-        tL.root = temp;
-        
- }
-   while (response.find("No") != string :: npos);
-}
-
 
 void test_initializeList()
 {
