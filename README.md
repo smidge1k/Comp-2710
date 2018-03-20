@@ -1,7 +1,7 @@
 # Comp 2710
 Software Construction - Auburn University (Spring 2018)
 
-Course Description: Intensive experience in software construction, to include topics such as testing, debugging, and associated tools; configuration management; low-level file and device I/O; systems and event-driven programming.
+Course Description: Intensive experience in software construction, to include topics such as testing, debugging, and associated tools; configuration management; low-level file and device I/O; systems and event-driven programming
 
 Learning Objectives:
 
