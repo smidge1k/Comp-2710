@@ -1,3 +1,4 @@
+
 # include <iostream>
 # include <string>
 # include <vector>
@@ -660,7 +661,12 @@ void systemTerminate(vector <user> data) {
     }
     outfile.close();
 }
-
+/**
+    Setup(your &vector)
+    Setup goes here. Passes the vector here if the file 
+    doesn't exist then make it then add the admin user name 
+    and password as well as the any other things you need for file reading.
+*/
  int main() {
      menu m;
      admin aD;
@@ -669,8 +675,6 @@ void systemTerminate(vector <user> data) {
      vector <user> dataBase(DATABASE_SIZE);
      vector <client> clientDatabase(DATABASE_SIZE);
      vector <account> accountDatabase(DATABASE_SIZE);
-     adUser.setUsername("admin");
-     adUser.setPassword("0000");
      adUser.setVerification(1);
      dataBase[0] = adUser;
 
