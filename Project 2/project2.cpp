@@ -23,6 +23,8 @@ class account;
 class client;
 
 int const DATABASE_SIZE = 100;
+ofstream outfile;
+ifstream readfile;
 
 class user {
     private:
@@ -644,7 +646,6 @@ void saveClient(client clientRead) {
 }
 
 void systemTerminate(vector <user> data) {
-    ofstream outfile;
     outfile.open("faculty_members.txt");
     for(int i = 0; i <= DATABASE_SIZE; i++){
         outfile << data[i].getUsername()<<endl;
@@ -667,6 +668,46 @@ void systemTerminate(vector <user> data) {
     doesn't exist then make it then add the admin user name 
     and password as well as the any other things you need for file reading.
 */
+void setUp(vector <user> &track) {
+    string name, file, password;
+    int classification;
+    
+    file = "staff-info.txt";
+    readfile.open((char*)file.c_str());
+    if(readfile.fail()) {
+        reafile.close();
+        outfile.open((char*)file.c_str());
+        outfile << "admin" <<< endl;
+        outfile << "0000" << endl;
+        outfile << "1" << endl;
+        outfile.close();
+        readfile.open((char*)file.c_str());
+    }
+    while(readfile >> name) {
+        user nUser = User();
+        admin aD = Admin();
+        
+        readfile.ignore(numeric_limits<streamsize>::max(), '\n');
+        getline(readfile, password);
+        readfile >> classification;
+        
+        switch(classification) {
+            case 1:
+                1 = admin(name, password);
+                track.insert({name, 1});
+                break;
+            case 2:
+                2 = user(name. password);
+                track.insert({name, 2});
+                break;
+            default:
+                cout << "Error" << endl;
+        }
+    }
+    readfile.close();
+}
+
+
  int main() {
      menu m;
      admin aD;
