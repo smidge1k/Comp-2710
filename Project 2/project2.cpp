@@ -669,8 +669,8 @@ void systemTerminate(vector <user> data) {
      vector <user> dataBase(DATABASE_SIZE);
      vector <client> clientDatabase(DATABASE_SIZE);
      vector <account> accountDatabase(DATABASE_SIZE);
-     //adUser.setUsername("admin");
-     //adUser.setPassword("0000");
+     adUser.setUsername("admin");
+     adUser.setPassword("0000");
      adUser.setVerification(1);
      dataBase[0] = adUser;
 
