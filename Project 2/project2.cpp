@@ -1,10 +1,15 @@
 
 # include <iostream>
+# include <termios.h>
+# include <stdio.h>
+# include <unistd.h>
+# include <ctype.h>
 # include <string>
 # include <vector>
 # include <array>
 # include <ostream>
 # include <fstream>
+# include <limits>
 using namespace std;
 
 /**
@@ -22,23 +27,53 @@ class admin;
 class account;
 class client;
 
-int const DATABASE_SIZE = 100;
+//int const DATABASE_SIZE = 100;
 ofstream outfile;
 ifstream readfile;
+
+/**
+ * Gets the charater.
+ */ 
+
+
+ int mygetch ( void ) 
+{
+  int ch;
+  struct termios oldt, newt;
+  
+  tcgetattr ( STDIN_FILENO, &oldt );
+  newt = oldt;
+  newt.c_lflag &= ~( ICANON | ECHO );
+  tcsetattr ( STDIN_FILENO, TCSANOW, &newt );
+  ch = getchar();
+  tcsetattr ( STDIN_FILENO, TCSANOW, &oldt );
+  
+  return ch;
+} 
+/**
+ * Press any key method lets any key. 
+ */
+
+void press_any_key(void) {
+  char ch;
+  cout << "Press any key to continue...\n";
+  ch = mygetch();
+  if (ch == 0 || ch == 224) mygetch();
+}
 
 class user {
     private:
 
     string name, password;
-
+    int verification;
     public:
-        friend class admin;
     user() { 
-        name = "";
-        password = "";
-
-        int verification = 0;
-        
+        setVerification(2);
+    }
+    user(string nameIn, string passwordIn) { 
+        name = nameIn;
+        password = passwordIn;
+        setVerification(2);
     }
 
     //setters
@@ -52,19 +87,18 @@ class user {
         verification = verificationIn;
     }
     //getters
-    string getUsername() {
+    string getUsername() const{
         return name;
     }
-   string getPassword() {
+   string getPassword() const{
        return password;
    }
-   int getVerification() {
+   int getVerification() const{
        return verification;
    }
     void changePassword(user, vector <user>&);
     void addClient(string, string, int, string, int, vector <client>);
 
-    int verification = 0;
 };
 
 void user::changePassword(user currentUser, vector <user>& dataBase) {
@@ -77,13 +111,14 @@ void user::changePassword(user currentUser, vector <user>& dataBase) {
         }
     }while (passwordIn == currentUser.getPassword());
     currentUser.setPassword(passwordIn);
-    for(int i = 0; i < DATABASE_SIZE; i++) {
+    for(int i = 0; i < dataBase.size(); i++) {
         if(dataBase[i].getUsername() == currentUser.getUsername()) {
             dataBase[i] = currentUser;
             break;
         }
     }
 }
+
 
 class menu {
     private:
@@ -115,23 +150,21 @@ class menu {
     }
      
     bool authenticate(string nameIn, string passwordIn, vector <user> dataBase) {
-        bool valid = false;
-        for (int i = 0; i < DATABASE_SIZE; i++) {
+        for (int i = 0; i < dataBase.size(); i++) {
             if(dataBase[i].getUsername() == nameIn && dataBase[i].getPassword() == passwordIn) {
-                valid = true;
+                return true;
                 break;
             }
-            else {
-                valid = false;
-            }
         }
-        return valid;
+        return false;
     }
     
     void showLogin() {
         cout << "\t===========================================================\n";
         cout << "\t|\t Login to Access the Teller Terminal System\t  |\n";
         cout << "\t===========================================================\n";
+
+
     }
    
     void adminMenu() {
@@ -139,7 +172,7 @@ class menu {
         cout << "\t|\tTeller Terminal System - System Administration\t  |\n";
         cout << "\t===========================================================\n";
         cout << "1) Client and Account Management\n";
-        cout << "2) Add a branch staff member\n";
+        cout << "2) Add a branch staff member\n";       
         cout << "3) Delete a branch staff member\n";
         cout << "4) Display branch staff\n";
         cout << "5) Change password\n";
@@ -164,7 +197,7 @@ class menu {
 
 user menu::returnClient(string nameIn, string passwordIn, vector <user> dataBase) {
     user fetch;
-    for(int i = 0; i < DATABASE_SIZE; i++) {
+    for(int i = 0; i < dataBase.size(); i++) {
         if(dataBase[i].getUsername() == nameIn && dataBase[i].getPassword() == passwordIn) {
             fetch.setVerification(dataBase[i].getVerification());
             fetch.setPassword(dataBase[i].getPassword());
@@ -175,41 +208,17 @@ user menu::returnClient(string nameIn, string passwordIn, vector <user> dataBase
     return fetch;
 }
 
-class admin {
-    private:
 
-    string name, password;
-    int verification;
-
+class admin : public user {
     public:
 
-    admin(){
-        string name = "";
-        string password = "";
-
-        int verification = 0;
-    };
-    //getters
-    string getAdminName(string) {
-        return name;
+    admin() : user(){    
+       setVerification(1);
     }
-    string getAdminPassword(string) {
-        return password;
+    admin(string usernameIn, string passwordIn) : user(usernameIn, passwordIn){
+       setVerification(1);
     }
-    int getVerification() {
-        return verification;
-    }
-    //setters
-    void setAdminName(string nameIn) {
-        name = nameIn;
-    }
-    void setAdminPassword(string passwordIn) {
-        password = passwordIn;
-    }
-    void setVerification(int verificationIn) {
-        verification = verificationIn;
-    }
-
+    
 
     void addNewUser(vector <user>& dataBase) {
         user nUser;
@@ -225,58 +234,44 @@ class admin {
         cout << "Role (1 - Admnistrator; 2 - Branch Staff): ";
         cin >> verificationIn;
         nUser.setVerification(verificationIn);
-        for(int i = 0; i < DATABASE_SIZE; i++) {
-            if(dataBase[i].getVerification() == 0) {
-                dataBase[i] = nUser;
-                if(nUser.getVerification() == 1) {
-                    cout << "Username: " << nameIn << "\tRole: System Administrator\n";
-                }
-                else{
-                    cout << "Username: " << nameIn << "\tRole: Branch Staff\n";
-                }
-                break;
-            }
-            else if(i == DATABASE_SIZE - 1 && dataBase[i].getVerification() != 0) {
-                cout << "We apologize. The database appears to be full\n";
-                break;
-            }
-        }
+        dataBase.push_back(nUser);
         
     }
 
     void deleteUser(vector <user>& dataBase) {
-        user emptyUser;
+        user nUser;
         string nameIn;
         int option;
 
        cout << "Delete a user - Username: ";
        cin >> nameIn;
-       cout << "3) Confirm\n";
-       cout << "4) Cancel\n";
+       cout << "1) Confirm\n";
+       cout << "2) Cancel\n";
        cout << "Please choose an option: ";
        cin >> option;
        switch(option){
-           case 3:
-            for(int i = 0; i < DATABASE_SIZE; i++){
+           case 1:
+            for(int i = 0; i < dataBase.size(); i++){
                 if(dataBase[i].getUsername() == nameIn) {
-                    dataBase[i] = emptyUser;
+                    dataBase[i] = nUser;
                     cout << "User " << nameIn << " was deleted.\n";
+                    dataBase.pop_back();
                     break;
                 }
-                else if(i == DATABASE_SIZE - 1) {
+                else if(i == dataBase.size() - 1) {
                     cout << "Error - User was not found in the system.\n";
                 }
             }
             
             break;
-        case 4:
+        case 2:
             break;
        }
     }
 
     void displayBranch(vector <user> dataBase) {
         int counter = 0;
-        for(int i = 0; i < DATABASE_SIZE; i++) {
+        for(int i = 0; i < dataBase.size(); i++) {
             if(dataBase[i].getVerification() != 0) {
                 if(dataBase[i].getVerification() == 1 || dataBase[i].getVerification() == 2) {
                   counter++;
@@ -284,13 +279,13 @@ class admin {
             }
         }
         cout << "There are " << counter << " users in the system at the moment.\n";
-        for(int i = 0; i < DATABASE_SIZE; i++) {
+        for(int i = 0; i < dataBase.size(); i++) {
             if(dataBase[i].getVerification() != 0) {
                 if(dataBase[i].getVerification() == 1) {
                     cout << "Username: " << dataBase[i].getUsername() << " Role: Administrator\n";
                 }
                 else if(dataBase[i].getVerification() == 2) {
-                    cout << "Username: " << dataBase[i].getUsername() << "Role: Branch Staff\n";
+                    cout << "Username: " << dataBase[i].getUsername() << " Role: Branch Staff\n";
                 }
             }
         }
@@ -308,7 +303,7 @@ class admin {
             }
         }while(passwordIn == currentUser.getPassword());
         currentUser.setPassword(passwordIn);
-        for(int i = 0; i < DATABASE_SIZE; i++) {
+        for(int i = 0; i < dataBase.size(); i++) {
             if(dataBase[i].getUsername() == currentUser.getUsername()) {
                 dataBase[i] = currentUser;
                 break;
@@ -316,6 +311,8 @@ class admin {
         }
     }
 };
+
+
 
 class account {
     private:
@@ -466,17 +463,13 @@ void addClient(vector <client>& clientDatabase) {
     cout << "Annual Income: ";
     cin >> incomeIn;
     newClient.setIncome(incomeIn);
-    for(int i = 0; i < DATABASE_SIZE; i++) {
+    for(int i = 0; i < clientDatabase.size(); i++) {
         if(clientDatabase[i].getVerification() == 0) {
             newClient.setVerification(1);
             clientDatabase[i] = newClient;
             cout << "A new client was added!\n";
             break;
-        }
-       else if(i == DATABASE_SIZE - 1 && clientDatabase[i].getVerification() != 0) {
-           "We apologize. The database appears to be full\n";
-           break;
-       } 
+        } 
     }
 }
 
@@ -486,7 +479,7 @@ void addAccount(vector <client>& clientDatabase, vector <account>& accountDataba
 
     cout << "Choose a client: ";
     cin >> clName;
-    for(int i = 0; i < DATABASE_SIZE; i++) {
+    for(int i = 0; i < clientDatabase.size(); i++) {
         if(clientDatabase[i].getClientName() == clName) {
             cout << "A new account will be created for " << clientDatabase[i].getClientName() << "...\n";
             account newAccount;
@@ -505,20 +498,18 @@ void addAccount(vector <client>& clientDatabase, vector <account>& accountDataba
             newAccount.setBalance(balance);
 
             newAccount.setAccountName(clientDatabase[i].getClientName());
-            for(int j = 0; j < DATABASE_SIZE; j++) {
+            
+            for(int j = 0; j < accountDatabase.size(); j++) {
                 if(accountDatabase[j].getVerification() == 0) {
                     accountDatabase[j] = newAccount;
                     cout << "A new account was created for " << accountDatabase[i].getAccountName() << " \n";
                     break;
                 }
-                else if(i == DATABASE_SIZE -1 && accountDatabase[i].getVerification() == 0) {
-                    "We apologize. The database appears to br full\n";
-                    break;
-                }
+               
             }
             break;
         }
-        else if(i == DATABASE_SIZE - 1) {
+        else if(i == clientDatabase.size() - 1) {
             cout << "Error - The client is not in the system.\n";
         }
     }
@@ -534,7 +525,7 @@ void editClient(vector <client>& clientDatabase) {
     cout << "Choose a client: ";
     cin >> clName;
 
-    for(int i = 0; i < DATABASE_SIZE; i++) {
+    for(int i = 0; i < clientDatabase.size(); i++) {
         if(clientDatabase[i].getClientName() == clName) {
             cout << "Display " << clientDatabase[i].getClientName() << "'s information: \n";
             cout << "Address: " << clientDatabase[i].getAddress() << "\n";
@@ -570,7 +561,7 @@ void editClient(vector <client>& clientDatabase) {
             }
             break;
         }
-        else if(i == DATABASE_SIZE - 1) {
+        else if(i == clientDatabase.size() - 1) {
             cout << "Error - Accont " << clientDatabase[i].getClientName() << " is not in the system.\n";
         }
     }
@@ -583,7 +574,7 @@ void manageAccount(vector <account>& accountDatabase) {
     cout << "Which account will be managed? ";
     cin >> accountNum;
 
-    for(int i = 0; i < DATABASE_SIZE; i++) {
+    for(int i = 0; i < accountDatabase.size(); i++) {
         if(accountDatabase[i].getAccountNum() == accountNum) {
             do{
                 cout << "Manage account " << accountDatabase[i].getAccountNum() << " for " << accountDatabase[i].getAccountName() << "...\n";
@@ -612,7 +603,7 @@ void manageAccount(vector <account>& accountDatabase) {
             }while(active == true);
             break;
         }
-        else if(i == DATABASE_SIZE - 1) {
+        else if(i == accountDatabase.size() - 1) {
             cout << "Error - Account " << accountNum << " is not in the system.\n";
         }
     }
@@ -620,8 +611,8 @@ void manageAccount(vector <account>& accountDatabase) {
 
 void saveAccount(account accountRead) {
     ofstream outfile;
-
-    outfile.open("account_info.txt");
+    string file = "account_info.txt";
+    outfile.open((char*)file.c_str());
     outfile << "Account name: " << accountRead.getAccountName() << endl;
     outfile << "Balance: " << accountRead.getBalance() << endl;
     outfile << "Account Type: " << accountRead.getAccountType() << endl;
@@ -633,8 +624,8 @@ void saveAccount(account accountRead) {
 
 void saveClient(client clientRead) {
     ofstream outfile;
-
-    outfile.open("client_info.txt");
+    string file = "client_info.txt";
+    outfile.open((char*)file.c_str());
     outfile << "Client name: " << clientRead.getClientName() << endl;
     outfile << "Address: " << clientRead.getAddress() << endl;
     outfile << "Employer: " << clientRead.getEmployer() << endl;
@@ -645,22 +636,25 @@ void saveClient(client clientRead) {
     cout << "Account information has been saved in the client_info file." << endl;
 }
 
-void systemTerminate(vector <user> data) {
-    outfile.open("faculty_members.txt");
-    for(int i = 0; i <= DATABASE_SIZE; i++){
-        outfile << data[i].getUsername()<<endl;
-        outfile<<  data[i].getPassword()<<endl; 
-        if(data[i].getVerification() != 0) {
-            if(data[i].getVerification() == 1) {
-                outfile <<1<<endl;
-            }
-            else if(data[i].getVerification() == 2) {
-                outfile <<2<<endl;
-            }
+void systemTerminate(vector <user> &data) {
+    string file = "faculty_members.txt";
+    outfile.open((char*)file.c_str());
+    for(int i = 0; i <= data.size(); i++){
+        
+        user u = data.at(i);
+        outfile<<u.getUsername()<<endl;
+        outfile<<u.getPassword()<<endl; 
+        if(data[i].getVerification() == 1) {
+            outfile <<1<<endl;
         }
+        else if(data[i].getVerification() == 2) {
+            outfile <<2<<endl;
+        }  
     
     }
+    
     outfile.close();
+    
 }
 /**
     Setup(your &vector)
@@ -669,36 +663,38 @@ void systemTerminate(vector <user> data) {
     and password as well as the any other things you need for file reading.
 */
 void setUp(vector <user> &track) {
-    string name, file, password;
+    string name;
+    string file;
+    string password;
     int classification;
     
     file = "staff-info.txt";
     readfile.open((char*)file.c_str());
     if(readfile.fail()) {
-        reafile.close();
+        readfile.close();
         outfile.open((char*)file.c_str());
-        outfile << "admin" <<< endl;
+        outfile << "admin" << endl;
         outfile << "0000" << endl;
         outfile << "1" << endl;
         outfile.close();
         readfile.open((char*)file.c_str());
     }
     while(readfile >> name) {
-        user nUser = User();
-        admin aD = Admin();
+        user uS = user();
+        admin aD = admin();
         
         readfile.ignore(numeric_limits<streamsize>::max(), '\n');
         getline(readfile, password);
         readfile >> classification;
-        
         switch(classification) {
             case 1:
-                1 = admin(name, password);
-                track.insert({name, 1});
+                aD = admin(name, password);
+                track.push_back(aD);
+                
                 break;
             case 2:
-                2 = user(name. password);
-                track.insert({name, 2});
+                uS = user(name, password);
+                track.push_back(uS);
                 break;
             default:
                 cout << "Error" << endl;
@@ -713,12 +709,11 @@ void setUp(vector <user> &track) {
      admin aD;
      user currUser; //current user
      user adUser; //admin user
-     vector <user> dataBase(DATABASE_SIZE);
-     vector <client> clientDatabase(DATABASE_SIZE);
-     vector <account> accountDatabase(DATABASE_SIZE);
-     adUser.setVerification(1);
-     dataBase[0] = adUser;
-
+     vector <user> dataBase;
+     vector <client> clientDatabase;
+     vector <account> accountDatabase;
+     setUp(dataBase);
+     //adUser.setVerification(1); 
      string name, password;
      int option;
      char a;
@@ -772,20 +767,20 @@ void setUp(vector <user> &track) {
                                             switch(option3) {
                                                 case 1:
                                                     addClient(clientDatabase);
-                                                    cout << "Press any key to continue...\n";
-                                                    cin.ignore().get();
+                                                    press_any_key();
+                                                    
                                                     valid3 = true;
                                                     break;
                                                 case 2:
                                                     addAccount(clientDatabase, accountDatabase);
-                                                    cout << "Press any key to continue...\n";
-                                                    cin.ignore().get();
+                                                    press_any_key();
+                                                    
                                                     valid3 = true;
                                                     break;
                                                 case 3:
                                                     editClient(clientDatabase);
-                                                    cout << "Press any key to continue...\n";
-                                                    cin.ignore().get();
+                                                   press_any_key();
+                                                    
                                                     valid3 = true;
                                                     break;
                                                 case 4:
@@ -793,18 +788,18 @@ void setUp(vector <user> &track) {
                                                     valid3 = true;
                                                     break;
                                                 case 5:
-                                                    for(int i = 0; i < DATABASE_SIZE; i++) {
+                                                    for(int i = 0; i < clientDatabase.size(); i++) {
                                                         if(clientDatabase[i].getVerification() == 1) {
                                                             saveClient(clientDatabase[i]);
                                                         }
                                                     }
-                                                    for(int i = 0; i < DATABASE_SIZE; i++) {
+                                                    for(int i = 0; i < accountDatabase.size(); i++) {
                                                         if(accountDatabase[i].getVerification() == 1){
                                                             saveAccount(accountDatabase[i]);
                                                         }
                                                     }
-                                                    cout << "Press any key to continue...\n";
-                                                    cin.ignore().get();
+                                                    press_any_key();
+                                                    
                                                     valid3 = true;
                                                     break;
                                                 case 6:
@@ -818,26 +813,22 @@ void setUp(vector <user> &track) {
                                     break;
                                 case 2:
                                     aD.addNewUser(dataBase);
-                                    cout << "Press any key to continue...\n";
-                                    cin.ignore().get();
+                                    press_any_key();
                                     valid1 = true;
                                     break;
                                 case 3:
                                     aD.deleteUser(dataBase);
-                                    cout << "Press any key to continue...\n";
-                                    cin.ignore().get();
+                                    press_any_key();
                                     valid1 = true;
                                     break;
                                 case 4:
                                     aD.displayBranch(dataBase);
-                                    cout << "Press any key to continue...\n";
-                                    cin.ignore().get();
+                                    press_any_key();
                                     valid1 = true;
                                     break;
                                 case 5:
                                     aD.changePassword(currUser, dataBase);
-                                    cout << "Press any key to continue...\n";
-                                    cin.ignore().get();
+                                    press_any_key();
                                     valid1 = true;
                                     break;
                                 case 6:
@@ -866,20 +857,17 @@ void setUp(vector <user> &track) {
                                             switch(option2) {
                                                 case 1:
                                                     addClient(clientDatabase);
-                                                    cout << "Press any key to continue...\n";
-                                                    cin.ignore().get();
+                                                    press_any_key();
                                                     valid4 = true;
                                                     break;
                                                 case 2:
                                                     addAccount(clientDatabase, accountDatabase);
-                                                    cout << "Press any key to continue...\n";
-                                                    cin.ignore().get();
+                                                    press_any_key();
                                                     valid4 = true;
                                                     break;
                                                 case 3:
                                                     editClient(clientDatabase);
-                                                    cout << "Press any key to continue...\n";
-                                                    cin.ignore().get();
+                                                    press_any_key();
                                                     valid4 = true;
                                                     break;
                                                 case 4:
@@ -887,18 +875,17 @@ void setUp(vector <user> &track) {
                                                     valid4 = true;
                                                     break;
                                                 case 5:
-                                                    for(int i = 0; i < DATABASE_SIZE; i++) {
+                                                    for(int i = 0; i < clientDatabase.size(); i++) {
                                                         if(clientDatabase[i].getVerification() == 1) {
                                                             saveClient(clientDatabase[i]);
                                                         }
                                                     }
-                                                    for(int i = 0; i < DATABASE_SIZE; i++) {
+                                                    for(int i = 0; i < accountDatabase.size(); i++) {
                                                         if(accountDatabase[i].getVerification() ==1) {
                                                             saveAccount(accountDatabase[i]);
                                                         }
                                                     }
-                                                    cout << "Press any key to continue...\n";
-                                                    cin.ignore().get();
+                                                    press_any_key();
                                                     valid4 = true;
                                                     break;
                                                 case 6:
@@ -912,8 +899,7 @@ void setUp(vector <user> &track) {
                                         break;
                                     case 2:
                                         currUser.changePassword(currUser, dataBase);
-                                        cout << "Press any key to continue...\n";
-                                        cin.ignore().get();
+                                        press_any_key();
                                         valid2 = true;
                                         break;
                                     case 3:
@@ -931,8 +917,7 @@ void setUp(vector <user> &track) {
                 break;
             case 2:
                 systemTerminate(dataBase);
-                cout << "Press any key to continue...\n";
-                cin.ignore().get();
+                press_any_key();
                 valid = false;
                 break;
             default:
